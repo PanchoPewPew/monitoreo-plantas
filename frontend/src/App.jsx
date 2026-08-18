@@ -25,7 +25,23 @@ function getStoredSession() {
 
 function App() {
   const [view, setView] = useState('login')
-  const [user, setUser] = useState(() => getStoredSession().user)
+
+  // BYPASS: inyecta sesión de prueba para saltar el login.
+  // Cambia a false para restaurar el flujo normal de autenticación.
+  const SKIP_AUTH = true
+
+  const mockUser = {
+    id: 'mock-user-1',
+    name: 'Usuario Demo',
+    email: 'demo@cultivos.cl',
+    role: 'Administrador',
+    backendRole: 'admin',
+  }
+
+  const [user, setUser] = useState(() => {
+    if (SKIP_AUTH) return mockUser
+    return getStoredSession().user
+  })
   const [theme, setTheme] = useState(() => localStorage.getItem(THEME_STORAGE_KEY) || 'light')
 
   useEffect(() => {

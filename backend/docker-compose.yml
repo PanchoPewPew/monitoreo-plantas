@@ -1,11 +1,11 @@
+# docker-compose solo para el backend (standalone).
+# Para levantar backend + frontend juntos usa el docker-compose.yml de la raíz del proyecto.
 services:
   api:
     build: .
     container_name: backend-monitoreo
     ports:
-      - "8000:8000"
+      - "8888:8000"
     env_file:
       - .env
-    volumes:
-      - .:/code         # ← hot reload en desarrollo
     restart: unless-stopped

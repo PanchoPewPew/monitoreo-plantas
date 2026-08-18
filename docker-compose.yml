@@ -1,0 +1,25 @@
+services:
+
+  # ── Backend: FastAPI ───────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: backend-monitoreo
+    ports:
+      - "8888:8000"
+    env_file:
+      - ./backend/.env
+    restart: unless-stopped
+
+  # ── Frontend: React + Vite (build estático via nginx) ──────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend-monitoreo
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    restart: unless-stopped

@@ -2,7 +2,25 @@ const jsonHeaders = {
   'Content-Type': 'application/json',
 };
 
-const apiUrl = (import.meta.env.VITE_BACKEND_URL || '').trim().replace(/\/$/, '')
+// Determinar URL del backend:
+// - Modo dev (vite): usa variable de entorno o puerto 8888
+// - Modo producción (nginx): usa rutas relativas (proxy maneja /api)
+const getApiUrl = () => {
+  // Si Vite inyectó VITE_BACKEND_URL, úsala
+  if (import.meta.env.VITE_BACKEND_URL) {
+    return import.meta.env.VITE_BACKEND_URL.trim().replace(/\/$/, '')
+  }
+  
+  // Si estamos en localhost, usa 8888
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    return 'http://localhost:8888'
+  }
+  
+  // Producción: rutas relativas (nginx proxy)
+  return ''
+}
+
+const apiUrl = getApiUrl()
 
 function parseRoleToBackend(role) {
   if (!role) return 'agronomo'

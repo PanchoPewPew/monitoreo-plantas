@@ -2,6 +2,11 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 // https://vite.dev/config/
+// VITE_PROXY_TARGET: permite cambiar el target del proxy según el entorno
+//   - Local (sin Docker): http://127.0.0.1:8888
+//   - Docker dev:         http://backend:8000  (nombre del servicio en docker-compose.dev.yml)
+const proxyTarget = process.env.VITE_PROXY_TARGET || 'http://127.0.0.1:8888'
+
 export default defineConfig({
   plugins: [react()],
   preview: {
@@ -10,12 +15,12 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://127.0.0.1:8000',
+        target: proxyTarget,
         changeOrigin: true,
       },
       '/backend-status': {
-        target: 'http://127.0.0.1:8000',
-        changeOrigin: true, 
+        target: proxyTarget,
+        changeOrigin: true,
         rewrite: () => '/',
       },
     },

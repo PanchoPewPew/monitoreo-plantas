@@ -7,6 +7,7 @@ from app.api.alertas import router as alertas_router
 from app.api.predio import router as predios_router
 from app.api.sensores import router as sensores_router
 from app.api.telemetry import router as telemetry_router
+from app.api.ttn import router as ttn_router
 from app.api.umbrales import router as umbrales_router
 from app.api.usuario import auth_router, router as usuarios_router
 
@@ -39,6 +40,7 @@ app.add_middleware(
 
 app.include_router(auth_router)
 app.include_router(telemetry_router)
+app.include_router(ttn_router)
 app.include_router(alertas_router)
 app.include_router(sensores_router)
 app.include_router(predios_router)

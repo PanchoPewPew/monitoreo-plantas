@@ -1,0 +1,32 @@
+services:
+
+  # ── Backend: FastAPI con hot reload ────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: backend-monitoreo-dev
+    ports:
+      - "8888:8000"
+    env_file:
+      - ./backend/.env
+    volumes:
+      - ./backend:/app
+    restart: unless-stopped
+
+  # ── Frontend: Vite dev server con hot reload ───────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: frontend-monitoreo-dev
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules  # evita sobrescribir node_modules del contenedor
+    depends_on:
+      - backend
+    restart: unless-stopped
+    environment:
+      - VITE_PROXY_TARGET=http://backend:8000
