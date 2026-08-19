@@ -2,28 +2,27 @@ const jsonHeaders = {
   'Content-Type': 'application/json',
 }
 
-// Backend URL: detecta si es producción (Railway) o desarrollo (localhost)
-// En Railway, siempre usa la URL hardcodeada del backend production
+// Determina la URL base del backend según el entorno:
+// - Render: usa rutas relativas (/api/...) — nginx proxy maneja el ruteo
+// - localhost: apunta al backend local en puerto 8888
 const getBackendUrl = () => {
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname
     console.log('Current hostname:', hostname)
-    
-    // Si estamos en cualquier dominio railway y el hostname tiene "frontend", apunta al backend
-    if (hostname.includes('railway') && (hostname.includes('frontend') || hostname.includes('production'))) {
-      console.log('Detectado Railway: usando backend-production-3697.up.railway.app')
-      return 'https://backend-production-3697.up.railway.app'
-    }
-    
-    // En desarrollo: localhost
+
+    // En localhost apuntar al backend local
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      console.log('Detectado localhost: usando http://localhost:8000')
-      return 'http://localhost:8000'
+      console.log('Detectado localhost: usando http://localhost:8888')
+      return 'http://localhost:8888'
     }
+
+    // En cualquier dominio en la nube (Render, Railway, etc.)
+    // usar rutas relativas — nginx proxy redirige /api/ al backend
+    console.log('Detectado dominio en la nube: usando rutas relativas')
+    return ''
   }
-  
-  // Default a localhost si no se puede determinar
-  return 'http://localhost:8000'
+
+  return 'http://localhost:8888'
 }
 
 const backendUrl = getBackendUrl()
@@ -53,10 +52,36 @@ export async function fetchBackendStatus(forceMode = 'auto') {
     }
   }
 
-  return {
-    status: 'ok',
-    simulated: false,
-    message: 'Backend conectado correctamente.',
+  // Llamada real al backend para verificar que está disponible
+  try {
+    const statusUrl = backendUrl ? `${backendUrl}/` : '/backend-health'
+    const response = await fetch(statusUrl, {
+      method: 'GET',
+      signal: AbortSignal.timeout(5000),
+    })
+
+    if (response.ok) {
+      return {
+        status: 'ok',
+        available: true,
+        simulated: false,
+        message: 'Backend conectado correctamente.',
+      }
+    }
+
+    return {
+      status: 'error',
+      available: false,
+      simulated: false,
+      message: `Backend respondió con error ${response.status}.`,
+    }
+  } catch {
+    return {
+      status: 'offline',
+      available: false,
+      simulated: true,
+      message: 'No se pudo conectar con el backend. Modo simulado activo.',
+    }
   }
 }
 
