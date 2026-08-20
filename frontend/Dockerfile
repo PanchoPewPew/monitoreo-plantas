@@ -3,9 +3,14 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# URL del backend — se pasa como build arg en Render/Railway
-# Ejemplo: --build-arg BACKEND_URL=https://mi-backend.up.railway.app
+# URLs y keys — se pasan como build args en Render/Railway
 ARG BACKEND_URL=http://localhost:8888
+ARG VITE_SUPABASE_URL=""
+ARG VITE_SUPABASE_PUBLISHABLE_KEY=""
+
+# Exponer como variables de entorno para que Vite las inyecte en el bundle
+ENV VITE_SUPABASE_URL=$VITE_SUPABASE_URL
+ENV VITE_SUPABASE_PUBLISHABLE_KEY=$VITE_SUPABASE_PUBLISHABLE_KEY
 
 COPY package.json package-lock.json ./
 RUN npm ci
